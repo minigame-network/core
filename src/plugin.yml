@@ -1,0 +1,39 @@
+name: ParadiseCore
+version: 1.0.0
+description: The core to everything on the PVPCentral network.
+authors: [chasertw123, Sodex234]
+depend: [ViaVersion, ProtocolLib]
+
+main: me.chasertw123.minigames.core.Main
+
+commands:
+  AddNote:
+    description: Used to leave notes on a player's account.
+    aliases: [noteadd, add_note, note_add]
+  Discord:
+    description: Gives a player a link to PVPCentral's discord.
+    aliases: []
+  History:
+    description: Used to check player's infractions.
+    aliases: [his]
+  Hub:
+    description: Used to send yourself to the hub server.
+    aliases: [lobby, lob]
+  Report:
+    description: Used to report other player's when a staff member isn't around.
+    aliases: [rep]
+  PLocal:
+    description: Joins queue Locally
+    aliases: []
+  gamebooster:
+    description: Game booster command
+    aliases: []
+  Punish:
+    description: Punish a player
+    aliases: []
+  ModifyStat:
+    description: Modify Stat Command
+    aliases: []
+  Coins:
+    description: Tells you how many coins you have
+    aliases: [coin]
