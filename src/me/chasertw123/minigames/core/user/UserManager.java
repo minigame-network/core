@@ -2,6 +2,7 @@ package me.chasertw123.minigames.core.user;
 
 import com.mongodb.client.model.Filters;
 import me.chasertw123.minigames.core.Main;
+import me.chasertw123.minigames.core.database.GenericDatabaseMethods;
 import me.chasertw123.minigames.shared.database.Database;
 import org.bson.Document;
 import org.bukkit.Bukkit;
@@ -110,7 +111,7 @@ public class UserManager {
             if (pp.getUsername().equals(player.getName()))
                 return pp;
 
-        User pp = Main.getNoSQLDatabase().getUser(this.getOfflineUser(player.getUniqueId()));
+        User pp = new User(this.getOfflineUser(player.getUniqueId()));
         onlinePlayers.add(pp);
 
         return pp;

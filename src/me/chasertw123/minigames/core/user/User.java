@@ -5,12 +5,12 @@ import com.google.common.io.ByteStreams;
 import com.mongodb.client.model.Filters;
 import me.chasertw123.minigames.core.Main;
 import me.chasertw123.minigames.core.api.v2.CoreAPI;
+import me.chasertw123.minigames.core.database.GenericDatabaseMethods;
 import me.chasertw123.minigames.core.features.chests.ChestType;
 import me.chasertw123.minigames.core.features.quests.Quest;
 import me.chasertw123.minigames.core.features.quests.QuestType;
 import me.chasertw123.minigames.core.user.data.reports.Report;
 import me.chasertw123.minigames.core.user.data.settings.Setting;
-import me.chasertw123.minigames.core.database.NoSQLDatabase;
 import me.chasertw123.minigames.core.event.AchievementUnlockEvent;
 import me.chasertw123.minigames.core.event.UserQuitEvent;
 import me.chasertw123.minigames.core.event.UserToggleSettingEvent;
@@ -22,6 +22,7 @@ import me.chasertw123.minigames.core.utils.items.AbstractItem;
 import me.chasertw123.minigames.core.utils.items.cItemStack;
 import me.chasertw123.minigames.core.utils.scoreboard.Scoreboard;
 import me.chasertw123.minigames.shared.booster.GameBooster;
+import me.chasertw123.minigames.shared.database.Database;
 import me.chasertw123.minigames.shared.framework.ServerGameType;
 import me.chasertw123.minigames.shared.framework.ServerSetting;
 import me.chasertw123.minigames.shared.framework.ServerType;
@@ -74,11 +75,13 @@ public class User extends OfflineUser implements iUser {
     public User(OfflineUser ou) {
         super(ou.getUUID(), ou.getUsername(), ou.getRank(), 0, ou.getInfractions(), ou.getInfractionPoints(), ou.getPunishments(), ou.getDeluxe());
 
-        Long start = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
+        Database database = CoreAPI.getDatabase();
 
-        if (Main.getNoSQLDatabase().containsUser(Main.getNoSQLDatabase().getCollection(NoSQLDatabase.CORE_COLLECTION_ID), ou.getUUID())) {
+        if (GenericDatabaseMethods.containsUser(database.getMongoCollection(Database.Collection.CORE_USER), ou.getUUID())) {
 
-            Document userData = Main.getNoSQLDatabase().getCollection(NoSQLDatabase.CORE_COLLECTION_ID).find(Filters.eq("uuid", ou.getUUID().toString())).first();
+            Document userData = database.getMongoCollection(Database.Collection.CORE_USER)
+                    .find(Filters.eq("uuid", ou.getUUID().toString())).first();
 
             ((Document) userData.get("stats")).keySet().forEach(obj -> this.stats.put(Stat.valueOf(obj), ((Document) userData.get("stats")).getInteger(obj)));
             ((Document) userData.get("chests")).keySet().forEach(obj -> this.chests.put(ChestType.valueOf(obj), ((Document) userData.get("chests")).getInteger(obj)));
@@ -696,6 +699,6 @@ public class User extends OfflineUser implements iUser {
      * @return boolean if data saved
      */
     public boolean savePlayerData() {
-        return Main.getNoSQLDatabase().saveUserData(this);
+        return GenericDatabaseMethods.saveUserData(this);
     }
 }

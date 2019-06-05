@@ -1,63 +1,28 @@
 package me.chasertw123.minigames.core.database;
 
-import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
 import me.chasertw123.minigames.core.Main;
 import me.chasertw123.minigames.core.features.chests.ChestType;
-import me.chasertw123.minigames.core.user.OfflineUser;
 import me.chasertw123.minigames.core.user.User;
 import me.chasertw123.minigames.core.user.data.VoteSite;
 import me.chasertw123.minigames.core.user.data.achievements.Achievement;
 import me.chasertw123.minigames.core.user.data.settings.Setting;
 import me.chasertw123.minigames.core.user.data.stats.Stat;
+import me.chasertw123.minigames.shared.database.Database;
 import me.chasertw123.minigames.shared.framework.ServerGameType;
 import org.bson.Document;
-import org.bukkit.Bukkit;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 
-/**
- * Created by Scott Hiett on 6/27/2017.
- */
-public class NoSQLDatabase {
+public class GenericDatabaseMethods {
 
-    public static final String CORE_COLLECTION_ID = "Core";
-    public static final String HUB_COLLECTION_ID = "Hub";
-
-    private MongoClient client;
-    private MongoDatabase database;
-    private HashMap<String, MongoCollection<Document>> collections;
-
-    public NoSQLDatabase() {
-
-        collections = new HashMap<>();
-        try {
-
-            client = new MongoClient(Main.getServerConfiguration().getMongoHost(), Main.getServerConfiguration().getMongoPort());
-            database = client.getDatabase(Main.getServerConfiguration().getMongoDatabase());
-
-            collections.put("Core", database.getCollection("Core"));
-            collections.put("Hub", database.getCollection("Hub"));
-
-            for (ServerGameType gameType : ServerGameType.values())
-                collections.put(gameType.getDisplay().replace(" ", ""), database.getCollection(gameType.getDisplay().replace(" ", "")));
-
-        } catch (Exception e) {
-            System.err.println("Unable to connect to one or more database(s)!");
-            Bukkit.getServer().shutdown();
-        }
-    }
-
-    public User getUser(OfflineUser offlineUser) {
-        return new User(offlineUser);
-    }
-
-    public boolean saveUserData(User user) {
-
+    public static boolean saveUserData(User user) {
         Document stats = new Document(), settings = new Document(), boosters = new Document(), votes = new Document(), activity = new Document(), chests = new Document(), userData = new Document();
         List<String> reports = new ArrayList<>(), achievements = new ArrayList<>(), friends = new ArrayList<>(), ignored = new ArrayList<>();
 
@@ -86,30 +51,14 @@ public class NoSQLDatabase {
                 .append("activity", activity)
                 .append("chests", chests);
 
-        UpdateResult result = getCollection(CORE_COLLECTION_ID).replaceOne(Filters.eq("uuid", user.getUUID().toString()), userData, new UpdateOptions().upsert(true));
+        UpdateResult result = Main.getMongoDatabase().getMongoCollection(Database.Collection.CORE_USER)
+                .replaceOne(Filters.eq("uuid", user.getUUID().toString()), userData, Database.upsert());
+
+
         return result.getModifiedCount() >= result.getMatchedCount();
     }
 
-    // Contains User
-    public boolean containsUser(MongoCollection<Document> collection, UUID uuid) {
+    public static boolean containsUser(MongoCollection<Document> collection, UUID uuid) {
         return collection.find(Filters.eq("uuid", uuid.toString())).first() != null;
     }
-
-    public void closeConnection(){
-        client.close();
-    }
-
-    public MongoCollection<Document> getCollection(String id) {
-        return collections.get(id);
-    }
-
-    public MongoCollection<Document> getCollection(ServerGameType gameType) {
-        return collections.get(gameType.getDisplay().replace(" ", ""));
-    }
-
-    // Static //
-    public static NoSQLDatabase getNoSQLDatabase() {
-        return Main.getNoSQLDatabase();
-    }
-
 }

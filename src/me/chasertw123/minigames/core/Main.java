@@ -5,7 +5,6 @@ import me.chasertw123.minigames.core.api.v2.CoreAPI;
 import me.chasertw123.minigames.core.collectibles.CollectibleManager;
 import me.chasertw123.minigames.core.collectibles.gadgets.Gadget_SheepBomb;
 import me.chasertw123.minigames.core.commands.CommandManager;
-import me.chasertw123.minigames.core.database.NoSQLDatabase;
 import me.chasertw123.minigames.core.features.boosters.BoosterManager;
 import me.chasertw123.minigames.core.features.boosters.Loop_BoosterCheck;
 import me.chasertw123.minigames.core.features.serverdata.ServerDataManager;
@@ -25,9 +24,8 @@ public class Main extends JavaPlugin {
     private static BoosterManager boosterManager;
     private static ServerConfiguration serverConfiguration;
     private static CollectibleManager collectibleManager;
-    private static NoSQLDatabase database;
     private static EntityHider entityHider;
-    private static Database mongoDatabase; // Main Database
+    private static Database mongoDatabase;
 
     @Override
     public void onLoad() {
@@ -37,7 +35,6 @@ public class Main extends JavaPlugin {
 
         mongoDatabase = new Database(serverConfiguration);
         collectibleManager = new CollectibleManager();
-        database = new NoSQLDatabase();
         serverDataManager = new ServerDataManager();
         userManager = new UserManager();
         boosterManager = new BoosterManager();
@@ -58,7 +55,6 @@ public class Main extends JavaPlugin {
     @Override
     public void onDisable() {
         Gadget_SheepBomb.SHEEP_BOMBS.forEach(Gadget_SheepBomb::onClear);
-        database.closeConnection();
 
         if (serverDataManager.getServerType() == ServerType.MINIGAME)
             serverDataManager.updateServerState(GeneralServerStatus.DELETE, 0);
@@ -76,10 +72,6 @@ public class Main extends JavaPlugin {
 
     public static CollectibleManager getCollectibleManager() {
         return collectibleManager;
-    }
-
-    public static NoSQLDatabase getNoSQLDatabase() {
-        return database;
     }
 
     public static Database getMongoDatabase() {
